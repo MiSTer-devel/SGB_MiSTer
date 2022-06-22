@@ -1,0 +1,8 @@
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) MSU1/MSU.sv ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) MSU1/msu_audio.v ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) MSU1/msu_fifo.v ]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) MSU1/msu_data_store.sv ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) SGB/SGBMap.v ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) SGB/GBTop.v ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) SGB/ICD2.v ]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) SGB/GB/files.qip ]
