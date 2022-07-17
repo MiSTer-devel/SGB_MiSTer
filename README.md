@@ -3,7 +3,7 @@
 Based on the [SNES core](https://github.com/MiSTer-devel/SNES_MiSTer) written by [srg320](https://github.com/srg320)
 
 ## Installing
-copy \*.rbf to root of SD card. Put some ROMs (`*.GBC`, `*.GB`) and the SGB BIOS into SGB folder
+Copy the `.RBF` to the root of your SD card. Put some ROMs (`*.GBC`, `*.GB`) and the SGB BIOS (`*.SFC`) into SGB folder.
 
 ## Features
 * MSU-1 Support
@@ -12,7 +12,7 @@ copy \*.rbf to root of SD card. Put some ROMs (`*.GBC`, `*.GB`) and the SGB BIOS
 * Save/Load Backup Game Boy RAM.
 
 ## Usage
-Load your SGB BIOS (has a `.SFC` file extension typically) from the OSD and load your Game Boy or Game Boy Color game. Here is a list of the [Super Game Boy enhanced games](https://en.wikipedia.org/wiki/List_of_Super_Game_Boy_games) that were released for reference.
+Load your SGB BIOS from the OSD and load your Game Boy or Game Boy Color game. Here is a list of the [Super Game Boy enhanced games](https://en.wikipedia.org/wiki/List_of_Super_Game_Boy_games) that were released for reference.
 
 The "SGB Speed" option in the OSD allows you to change the clock speed:
 * SGB1 = 4.295 MHz (2.4% faster than a real Game Boy)
