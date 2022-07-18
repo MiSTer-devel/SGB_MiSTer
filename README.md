@@ -19,4 +19,4 @@ The "SGB Speed" option in the OSD allows you to change the clock speed:
 * SGB2 = 4.194 MHz (The same as an original Game Boy)
 * SNES = 4.220 MHz (Brings it close to the SNES's refresh rate of 60.09Hz to reduce stutter)
 
-Press L+R at the same time to enter the Super Game Boy boot rom's menu. If you'd like to manually start the animated screensaver for the alternate borders built into the Super Game Boy, then press L, L, R, R, L, L, L, L, R in order. You will hear a ding if the border supports the screensaver animations.
+Press L+R at the same time to enter the Super Game Boy boot rom's menu. If you'd like to manually start the animated screensaver for the alternate borders built into the Super Game Boy, then press L, L, L, L, R in order. You will hear a ding if the border supports the screensaver animations.
