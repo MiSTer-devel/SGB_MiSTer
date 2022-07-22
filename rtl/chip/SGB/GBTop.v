@@ -5,6 +5,7 @@ module GBTop(
 	input         clk_en,
 
 	input         cart_download,
+	input         boot_download,
 	input         ioctl_wr,
 	input  [24:0] ioctl_addr,
 	input  [15:0] ioctl_dout,
@@ -151,8 +152,6 @@ gb gb (
 	.ce          ( clk_en    ),   // the whole gameboy runs on 4mhnz
 	.ce_2x       ( 0  ),   // ~8MHz in dualspeed mode (GBC)
 
-	.fast_boot   ( 0  ),
-
 	.isGBC       ( 0  ),
 	.isGBC_game  ( 0 ),
 	.isSGB       ( 1'b1 ),
@@ -170,6 +169,11 @@ gb gb (
 	.cart_oe     ( cart_oe    ),
 
 	.nCS         ( nCS     ),
+
+	.sgb_boot_download ( boot_download ),
+	.ioctl_wr       ( ioctl_wr       ),
+	.ioctl_addr     ( ioctl_addr     ),
+	.ioctl_dout     ( ioctl_dout     ),
 
 	// audio
 	.audio_l 	 ( audio_l ),

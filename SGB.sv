@@ -282,7 +282,7 @@ always @(posedge CLK_50M) begin
 	end
 end
 
-wire reset = RESET | buttons[1] | status[0] | cart_download | gb_cart_download | bk_loading | clearing_ram | msu_data_download;
+wire reset = RESET | buttons[1] | status[0] | cart_download | gb_cart_download | boot_download | bk_loading | clearing_ram | msu_data_download;
 
 ////////////////////////////  HPS I/O  //////////////////////////////////
 
@@ -323,6 +323,8 @@ parameter CONF_STR = {
 	"P1OJK,Stereo Mix,None,25%,50%,100%;", 
 
 	"P2,Hardware;",
+	"P2-;",
+	"P2FC5,BIN,Load SGB Boot;",
 	"P2-;",
 	"P2OH,Multitap,Disabled,Port2;",
 	"P2O34,Serial,OFF,SNAC SNES,SNAC GB;",
@@ -419,6 +421,7 @@ wire       PAL = status[14];
 wire code_index = &ioctl_index;
 wire code_download = ioctl_download & code_index;
 wire cart_download = ioctl_download & ioctl_index[5:0] == 6'h04;
+wire boot_download = ioctl_download & ioctl_index[5:0] == 6'h05;
 wire gb_cart_download = ioctl_download & (ioctl_index[5:0] == 6'h01 || ioctl_index == 8'h00);
 wire spc_download = 0;
 
@@ -543,6 +546,7 @@ main main
 	.IO_DAT(ioctl_dout),
 	.IO_WR(ioctl_wr),
 	.IO_GB_CART(gb_cart_download),
+	.IO_SGB_BOOT(boot_download),
 
 	.TURBO(0),
 

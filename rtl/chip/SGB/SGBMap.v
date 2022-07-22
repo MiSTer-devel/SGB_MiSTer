@@ -58,6 +58,7 @@ module SGBMap(
 	input      [15:0] io_dat,
 	input             io_wr,
 	input             io_gb_cart,
+	input             io_sgb_boot,
 
 	input             pal,
 	input       [1:0] sgb_speed,
@@ -139,6 +140,7 @@ GBTop GBTop
 	.clk_en         (gb_clk_en),
 
 	.cart_download  (io_gb_cart),
+	.boot_download  (io_sgb_boot),
 	.ioctl_wr       (io_wr),
 	.ioctl_addr     (io_addr),
 	.ioctl_dout     (io_dat),

@@ -72,6 +72,7 @@ module main (
 	input      [15:0] IO_DAT,
 	input             IO_WR,
 	input             IO_GB_CART,
+	input             IO_SGB_BOOT,
 
 	input       [4:0] DBG_BG_EN,
 	input             DBG_CPU_EN,
@@ -355,6 +356,7 @@ SGBMap SGBMap
 	.io_dat(IO_DAT),
 	.io_wr(IO_WR),
 	.io_gb_cart(IO_GB_CART),
+	.io_sgb_boot(IO_SGB_BOOT),
 
 	.pal(PAL),
 	.sgb_speed(SGB_SPEED),
