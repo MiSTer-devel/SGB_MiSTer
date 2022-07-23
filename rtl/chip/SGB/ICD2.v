@@ -267,6 +267,8 @@ always @(posedge clk or negedge rst_n) begin
 		trn_write_buf_l <= 0;
 		trn_write_buffer <= 0;
 		trn_write <= 0;
+		pix_x <= 0;
+		pix_y <= 0;
 	end else begin
 		old_lcd_vs <= lcd_vs;
 		if(~old_lcd_vs & lcd_vs) begin
