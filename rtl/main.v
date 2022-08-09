@@ -100,6 +100,7 @@ module main (
 	output [47:0]     GB_RTC_SAVEDTIME,
 	output            GB_RTC_INUSE,
 
+	input       [2:0] GB_MAPPER,
 	input       [1:0] SGB_SPEED,
 
 	output     [15:0] GB_AUDIO_L,
@@ -360,6 +361,7 @@ SGBMap SGBMap
 
 	.pal(PAL),
 	.sgb_speed(SGB_SPEED),
+	.gb_mapper(GB_MAPPER),
 
 	.rom_mask(ROM_MASK[18])
 );

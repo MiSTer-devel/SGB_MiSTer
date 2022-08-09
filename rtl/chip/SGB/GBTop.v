@@ -35,6 +35,8 @@ module GBTop(
 	output  [7:0] ram_mask_file,
 	output        cart_has_save,
 
+	input   [2:0] mapper_sel,
+
 	output [15:0] audio_l,
 	output [15:0] audio_r,
 
@@ -80,6 +82,8 @@ cart_top cart (
 	.ce_cpu      ( clk_en    ),
 	.ce_cpu2x    ( 0  ),
 	.speed       ( 0     ),
+
+	.mapper_sel  ( mapper_sel ),
 
 	.cart_addr   ( cart_addr  ),
 	.cart_a15    ( cart_a15   ),

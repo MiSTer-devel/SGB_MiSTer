@@ -62,6 +62,7 @@ module SGBMap(
 
 	input             pal,
 	input       [1:0] sgb_speed,
+	input       [2:0] gb_mapper,
 
 	input             rom_mask
 );
@@ -160,6 +161,8 @@ GBTop GBTop
 
 	.ram_mask_file  (gb_ram_mask),
 	.cart_has_save  (gb_has_save),
+
+	.mapper_sel     (gb_mapper),
 
 	.lcd_clkena     (lcd_clkena),
 	.lcd_data       (lcd_data),

@@ -297,6 +297,7 @@ wire reset = RESET | buttons[1] | status[0] | cart_download | gb_cart_download |
 parameter CONF_STR = {
 	"SGB;;",
 	"FS1,GBCGB ;",
+	"OPR,GB Mapper,Auto,WisdomTree,Mani161,MBC1,MBC3;",
 	"-;",
 	"FC4,SFC,Load SGB BIOS;",
 	"OUV,SGB Speed,SGB1,SGB2,SNES;",
@@ -417,6 +418,7 @@ wire [1:0] mouse_mode = status[6:5];
 wire       joy_swap = status[7];
 wire [1:0] sgb_speed = status[31:30];
 wire       PAL = status[14];
+wire [2:0] gb_mapper = status[27:25];
 
 wire code_index = &ioctl_index;
 wire code_download = ioctl_download & code_index;
@@ -571,6 +573,7 @@ main main
 	.GB_RTC_SAVEDTIME(RTC_savedtimeOut),
 	.GB_RTC_INUSE(RTC_inuse),
 
+	.GB_MAPPER(gb_mapper),
 	.SGB_SPEED(sgb_speed),
 
 	.GB_AUDIO_L(GB_AUDIO_L),

@@ -28,3 +28,4 @@ set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) mappers
 set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) mappers/rocket.sv ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) mappers/sachen.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) mappers/megaduck.v ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) mappers/misc.v ]
