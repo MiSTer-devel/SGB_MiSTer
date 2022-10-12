@@ -132,6 +132,18 @@ ICD2 ICD2
 	.gb_clk_en(gb_clk_en)
 );
 
+localparam MCLK_NTSC = 21477270;
+localparam MCLK_PAL  = 21281370;
+
+wire ce_32k;
+CEGen rtc_ce
+(
+	.CLK(clk),
+	.RST_N(rst_n),
+	.IN_CLK(pal ? MCLK_PAL : MCLK_NTSC),
+	.OUT_CLK(32768),
+	.CE(ce_32k)
+);
 
 GBTop GBTop
 (
@@ -185,6 +197,7 @@ GBTop GBTop
 	.gg_reset       (gg_reset),
 	.gg_available   (gg_available),
 
+	.ce_32k           (ce_32k),
 	.RTC_time         (gb_rtc_time_in),
 	.RTC_timestampOut (gb_rtc_timeout),
 	.RTC_savedtimeOut (gb_rtc_savedtime),

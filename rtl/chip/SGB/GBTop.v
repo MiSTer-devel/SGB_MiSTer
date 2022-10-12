@@ -51,6 +51,7 @@ module GBTop(
 	input [128:0] gg_code,
 	output        gg_available,
 
+	input         ce_32k,
 	input  [32:0] RTC_time,
 	output [31:0] RTC_timestampOut,
 	output [47:0] RTC_savedtimeOut,
@@ -129,6 +130,7 @@ cart_top cart (
 
 	.joystick_analog_0 ( 0 ),
 
+	.ce_32k           ( ce_32k           ),
 	.RTC_time         ( RTC_time         ),
 	.RTC_timestampOut ( RTC_timestampOut ),
 	.RTC_savedtimeOut ( RTC_savedtimeOut ),
