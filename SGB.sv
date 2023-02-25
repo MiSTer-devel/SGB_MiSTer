@@ -615,9 +615,9 @@ main main
 	.AUDIO_R(MAIN_AUDIO_R)
 );
 
-// Unsigned GB audio to signed before mixing with Main audio.
-wire [16:0] MAIN_GB_MIX_L = $signed(MAIN_AUDIO_L) + $signed({~GB_AUDIO_L[15],GB_AUDIO_L[14:0]});
-wire [16:0] MAIN_GB_MIX_R = $signed(MAIN_AUDIO_R) + $signed({~GB_AUDIO_R[15],GB_AUDIO_R[14:0]});
+// Mix GB audio with Main audio.
+wire [16:0] MAIN_GB_MIX_L = $signed(MAIN_AUDIO_L) + $signed({ GB_AUDIO_L[15],GB_AUDIO_L[12:0],2'b00 });
+wire [16:0] MAIN_GB_MIX_R = $signed(MAIN_AUDIO_R) + $signed({ GB_AUDIO_R[15],GB_AUDIO_R[12:0],2'b00 });
 
 // Mix msu_audio into main mix
 wire [16:0] AUDIO_MIX_L = $signed(MAIN_GB_MIX_L[16:1]) + $signed(msu_audio_l);
@@ -910,7 +910,7 @@ ioport port1
 	.PORT_P6(JOY1_P6),
 	.PORT_DO(JOY1_DO),
 
-	.JOYSTICK1((joy_swap ^ raw_serial) ? joy1 : joy0),
+	.JOYSTICK1((joy_swap ^ snac_snes) ? joy1 : joy0),
 
 	.MOUSE(ps2_mouse),
 	.MOUSE_EN(mouse_mode[0])
@@ -930,7 +930,7 @@ ioport port2
 	.PORT_P6(JOY2_P6),
 	.PORT_DO(JOY2_DO),
 
-	.JOYSTICK1((joy_swap ^ raw_serial) ? joy0 : joy1),
+	.JOYSTICK1((joy_swap ^ snac_snes) ? joy0 : joy1),
 	.JOYSTICK2(joy2),
 	.JOYSTICK3(joy3),
 	.JOYSTICK4(joy4),
@@ -954,7 +954,8 @@ wire gb_ser_data_out;
 wire gb_ser_clk_in;
 wire gb_ser_clk_out;
 
-wire [1:0] raw_serial = status[4:3];
+wire snac_snes = status[3];
+wire snac_gb   = status[4];
 
 assign USER_OUT[2] = 1'b1;
 assign USER_OUT[3] = 1'b1;
@@ -975,7 +976,7 @@ always_comb begin
 	JOY1_DI = JOY1_DO;
 	JOY2_DI = JOY2_DO;
 	JOY2_P6_DI = 1'b1;
-	if (raw_serial == 2'd1) begin
+	if (snac_snes) begin
 		USER_OUT[0] = JOY_STRB;
 		USER_OUT[1] = joy_swap ? ~JOY2_CLK : ~JOY1_CLK;
 		USER_OUT[4] = joy_swap ? JOY2_P6 : JOY1_P6;
@@ -983,7 +984,7 @@ always_comb begin
 		JOY2_DI = joy_swap ? {USER_IN[2], USER_IN[5]} : JOY2_DO;
 		JOY2_P6_DI = USER_IN[4];
 	end
-	if (raw_serial == 2'd2) begin
+	if (snac_gb) begin
 		if (gb_sc_int_clock) USER_OUT[0] = gb_ser_clk_out;
 		USER_OUT[1] = gb_ser_data_out;
 		gb_ser_data_in = USER_IN[2];
