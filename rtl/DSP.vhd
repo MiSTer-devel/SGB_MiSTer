@@ -37,6 +37,7 @@ entity DSP is
 
 		AUDIO_L		: out std_logic_vector(15 downto 0);
 		AUDIO_R		: out std_logic_vector(15 downto 0);
+		MUTE		: out std_logic;
 		SND_RDY		: out std_logic
 	);
 end DSP;
@@ -1088,7 +1089,7 @@ begin
 	LRCK <= not STEP_CNT(4);
 	BCK <= SUBSTEP_CNT(1);
 	SDAT <= OUTPUT(31);
-	
+	MUTE <= MUTE_FLG;
 	
 	--spc mode
 	process( CLK )

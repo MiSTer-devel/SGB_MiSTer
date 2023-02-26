@@ -475,6 +475,7 @@ end
 
 wire [15:0] MAIN_AUDIO_L, MAIN_AUDIO_R;
 wire [15:0] GB_AUDIO_L, GB_AUDIO_R;
+wire AUDIO_MUTE;
 
 main main
 (
@@ -611,6 +612,7 @@ main main
 	.MSU_DATA_REQ(msu_data_req),
 	.MSU_ENABLE(msu_enable),
 
+	.AUDIO_MUTE(AUDIO_MUTE),
 	.AUDIO_L(MAIN_AUDIO_L),
 	.AUDIO_R(MAIN_AUDIO_R)
 );
@@ -623,8 +625,8 @@ wire [16:0] MAIN_GB_MIX_R = $signed(MAIN_AUDIO_R) + $signed({ GB_AUDIO_R[15],GB_
 wire [16:0] AUDIO_MIX_L = $signed(MAIN_GB_MIX_L[16:1]) + $signed(msu_audio_l);
 wire [16:0] AUDIO_MIX_R = $signed(MAIN_GB_MIX_R[16:1]) + $signed(msu_audio_r);
 
-assign AUDIO_L = msu_enable ? AUDIO_MIX_L[16:1] : MAIN_GB_MIX_L[16:1];
-assign AUDIO_R = msu_enable ? AUDIO_MIX_R[16:1] : MAIN_GB_MIX_R[16:1];
+assign AUDIO_L = AUDIO_MUTE ? 16'd0 : msu_enable ? AUDIO_MIX_L[16:1] : MAIN_GB_MIX_L[16:1];
+assign AUDIO_R = AUDIO_MUTE ? 16'd0 : msu_enable ? AUDIO_MIX_R[16:1] : MAIN_GB_MIX_R[16:1];
 
 reg RESET_N = 0;
 reg RFSH = 0;

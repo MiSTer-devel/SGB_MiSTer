@@ -127,6 +127,7 @@ module main (
 	output            MSU_DATA_REQ,
 	input             MSU_ENABLE,
 
+	output            AUDIO_MUTE,
 	output     [15:0] AUDIO_L,
 	output     [15:0] AUDIO_R
 );
@@ -240,6 +241,7 @@ SNES SNES
 
 	.turbo(TURBO),
 
+	.audio_mute(AUDIO_MUTE),
 	.audio_l(AUDIO_L),
 	.audio_r(AUDIO_R)
 );
