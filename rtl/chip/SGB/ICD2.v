@@ -241,8 +241,9 @@ always @(posedge clk or negedge rst_n) begin
 	 if (~rst_n) begin
 		joypad_id <= 0;
 	end else if (gb_clk_en) begin
+		joypad_id <= (joypad_id & num_controllers);
 		if (~old_p15 & p15) begin
-			joypad_id <= (joypad_id + 1'b1) & num_controllers;
+			joypad_id <= (joypad_id + 1'b1);
 		end
 	end
 end
