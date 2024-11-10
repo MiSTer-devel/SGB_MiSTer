@@ -145,7 +145,8 @@ architecture rtl of SNES is
 	signal SMP_WE : std_logic;
 	signal SMP_CPU_DO : std_logic_vector(7 downto 0);
 	signal SMP_CPU_DI	: std_logic_vector(7 downto 0);
-	signal SMP_EN : std_logic;
+	signal SMP_EN_F : std_logic;
+	signal SMP_EN_R : std_logic;
 
 	signal APU_RAM_A : std_logic_vector(15 downto 0);
 	signal APU_RAM_DO	: std_logic_vector(7 downto 0);
@@ -347,7 +348,8 @@ begin
 		CLK			=> DSPCLK,
 		RST_N			=> RST_N,
 		CE				=> SMP_CE,
-		ENABLE		=> SMP_EN,
+		EN_R		   => SMP_EN_R,
+		EN_F		   => SMP_EN_F,
 		SYSCLKF_CE	=> INT_SYSCLKF_CE,
 		
 		A				=> SMP_A,
@@ -376,7 +378,8 @@ begin
 		ENABLE		=> ENABLE,
 		PAL			=> PAL,
 				
-		SMP_EN    	=> SMP_EN,
+		SMP_EN_F  	=> SMP_EN_F,
+		SMP_EN_R    => SMP_EN_R,
 		SMP_A     	=> SMP_A,
 		SMP_DO    	=> SMP_DO,
 		SMP_DI 		=> SMP_DI,
@@ -397,7 +400,7 @@ begin
 		IO_ADDR		=> IO_ADDR,
 		IO_DAT  		=> IO_DAT,
 		IO_WR			=> IO_WR,
-		
+
 		MUTE		=> AUDIO_MUTE,
 		AUDIO_L		=> AUDIO_L,
 		AUDIO_R		=> AUDIO_R
