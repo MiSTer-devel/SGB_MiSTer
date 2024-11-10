@@ -69,7 +69,7 @@ package PPU_PKG is
 	constant BG_FETCH_END		: unsigned(8 downto 0) := "100001111"; 	--(256+16)-1=271
 	constant M7_FETCH_START		: unsigned(8 downto 0) := "000001111"; 	--15
 	constant M7_FETCH_END		: unsigned(8 downto 0) := "100001110"; 	--(15+256)-1=270
-	constant M7_XY_LATCH			: unsigned(8 downto 0) := "000001011"; 	--11
+	constant M7_XY_LATCH			: unsigned(8 downto 0) := "000001000"; 	--8
 	constant SPR_GET_PIX_START	: unsigned(8 downto 0) := "000010000"; 	--16 
 	constant SPR_GET_PIX_END	: unsigned(8 downto 0) := "100001111"; 	--(16+256)-1=271
 	constant BG_GET_PIX_START	: unsigned(8 downto 0) := "000010001"; 	--17
@@ -107,6 +107,8 @@ package PPU_PKG is
 						 add: std_logic; half: std_logic) return unsigned;
 	function GetDCM(a: std_logic_vector(10 downto 0)) return std_logic_vector;
 	function Bright(mb: std_logic_vector(3 downto 0); b: unsigned(4 downto 0)) return std_logic_vector;
+	
+	function Mode7Clip(a: signed(13 downto 0)) return signed;
 
 end PPU_PKG;
 
@@ -198,6 +200,13 @@ package body PPU_PKG is
 		else
 			res := std_logic_vector(temp(8 downto 1) + temp(8 downto 6));
 		end if;
+		return res;
+	end function;
+
+	function Mode7Clip(a: signed(13 downto 0)) return signed is
+		variable res: signed(15 downto 0); 
+	begin
+		res := (0 to 5 => a(13)) & a(9 downto 0);
 		return res;
 	end function;
 
