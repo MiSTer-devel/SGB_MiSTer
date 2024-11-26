@@ -40,6 +40,7 @@ module SGBMap(
 	output     [47:0] gb_rtc_savedtime,
 	output            gb_rtc_inuse,
 
+	input             gb_audio_no_pops,
 	output     [15:0] gb_audio_l,
 	output     [15:0] gb_audio_r,
 
@@ -211,6 +212,7 @@ GBTop GBTop
 	.joy_p54        (joy_p54),
 	.joy_din        (joy_do),
 
+	.audio_no_pops  (gb_audio_no_pops),
 	.audio_l        (gb_audio_l),
 	.audio_r        (gb_audio_r),
 

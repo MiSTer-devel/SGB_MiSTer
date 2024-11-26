@@ -53,6 +53,7 @@ module gb (
 	input  [15:0] ioctl_dout,
 
 	// audio
+	input         audio_no_pops,
 	output [15:0] audio_l,
 	output [15:0] audio_r,
 
@@ -402,6 +403,7 @@ gbc_snd audio (
 	.reset			( reset_ss			),
 	
 	.is_gbc        ( isGBC           ),
+	.remove_pops   ( audio_no_pops   ),
 
 	.s1_read  		( audio_rd  		),
 	.s1_write 		( audio_wr  		),

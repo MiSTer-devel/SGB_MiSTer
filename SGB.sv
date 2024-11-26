@@ -293,7 +293,7 @@ wire reset = RESET | buttons[1] | status[0] | cart_download | gb_cart_download |
 // 0         1         2         3          4         5         6
 // 01234567890123456789012345678901 23456789012345678901234567890123
 // 0123456789ABCDEFGHIJKLMNOPQRSTUV 0123456789ABCDEFGHIJKLMNOPQRSTUV
-// X  XXXXX XXXXXX  X XX  XXXXXXXXX XXXXXXXXXXX       XXX
+// X  XXXXX XXXXXX  X XX  XXXXXXXXX XXXXXXXXXXXX      XXX
 
 `include "build_id.v"
 parameter CONF_STR = {
@@ -328,6 +328,7 @@ parameter CONF_STR = {
 	"P1o89,Scale,Normal,V-Integer,Narrower HV-Integer,Wider HV-Integer;",
 	"P1oA,Force 256px,Off,On;",
 	"P1-;",
+	"P1O[43],GB Audio mode,Accurate,No Pops;",
 	"P1OJK,Stereo Mix,None,25%,50%,100%;", 
 
 	"P2,Hardware;",
@@ -606,6 +607,7 @@ main main
 	.GB_MAPPER(gb_mapper),
 	.SGB_SPEED(sgb_speed),
 
+	.GB_AUDIO_NO_POPS(status[43]),
 	.GB_AUDIO_L(GB_AUDIO_L),
 	.GB_AUDIO_R(GB_AUDIO_R),
 
@@ -660,12 +662,12 @@ main main
 );
 
 // Mix GB audio with Main audio.
-wire [16:0] MAIN_GB_MIX_L = $signed(MAIN_AUDIO_L) + $signed({ GB_AUDIO_L[15],GB_AUDIO_L[12:0],2'b00 });
-wire [16:0] MAIN_GB_MIX_R = $signed(MAIN_AUDIO_R) + $signed({ GB_AUDIO_R[15],GB_AUDIO_R[12:0],2'b00 });
+wire [16:0] MAIN_GB_MIX_L = $signed(MAIN_AUDIO_L) + $signed({ GB_AUDIO_L[15],GB_AUDIO_L[13:0],1'b0 });
+wire [16:0] MAIN_GB_MIX_R = $signed(MAIN_AUDIO_R) + $signed({ GB_AUDIO_R[15],GB_AUDIO_R[13:0],1'b0 });
 
 // Mix msu_audio into main mix
-wire [16:0] AUDIO_MIX_L = $signed(MAIN_GB_MIX_L[16:1]) + $signed(msu_audio_l);
-wire [16:0] AUDIO_MIX_R = $signed(MAIN_GB_MIX_R[16:1]) + $signed(msu_audio_r);
+wire [16:0] AUDIO_MIX_L = $signed(MAIN_GB_MIX_L[16:1]) + $signed(msu_audio_l[15:1]);
+wire [16:0] AUDIO_MIX_R = $signed(MAIN_GB_MIX_R[16:1]) + $signed(msu_audio_r[15:1]);
 
 assign AUDIO_L = AUDIO_MUTE ? 16'd0 : msu_enable ? AUDIO_MIX_L[16:1] : MAIN_GB_MIX_L[16:1];
 assign AUDIO_R = AUDIO_MUTE ? 16'd0 : msu_enable ? AUDIO_MIX_R[16:1] : MAIN_GB_MIX_R[16:1];

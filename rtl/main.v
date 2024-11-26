@@ -103,6 +103,7 @@ module main (
 	input       [2:0] GB_MAPPER,
 	input       [1:0] SGB_SPEED,
 
+	input             GB_AUDIO_NO_POPS,
 	output     [15:0] GB_AUDIO_L,
 	output     [15:0] GB_AUDIO_R,
 
@@ -390,6 +391,7 @@ SGBMap SGBMap
 	.gb_rtc_savedtime(GB_RTC_SAVEDTIME),
 	.gb_rtc_inuse(GB_RTC_INUSE),
 
+	.gb_audio_no_pops(GB_AUDIO_NO_POPS),
 	.gb_audio_l(GB_AUDIO_L),
 	.gb_audio_r(GB_AUDIO_R),
 

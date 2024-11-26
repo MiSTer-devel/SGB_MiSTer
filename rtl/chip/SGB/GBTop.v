@@ -39,6 +39,7 @@ module GBTop(
 
 	input   [2:0] mapper_sel,
 
+	input         audio_no_pops,
 	output [15:0] audio_l,
 	output [15:0] audio_r,
 
@@ -207,6 +208,7 @@ gb gb (
 	.ioctl_dout     ( ioctl_dout     ),
 
 	// audio
+	.audio_no_pops (audio_no_pops),
 	.audio_l 	 ( audio_l ),
 	.audio_r 	 ( audio_r ),
 
