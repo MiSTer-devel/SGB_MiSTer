@@ -16,6 +16,8 @@ module GBTop(
 
 	output        cram_wr,
 
+	output        cpu_act,
+
 	output        lcd_clkena,
 	output  [1:0] lcd_data,
 	output  [1:0] lcd_mode,
@@ -55,7 +57,26 @@ module GBTop(
 	input  [32:0] RTC_time,
 	output [31:0] RTC_timestampOut,
 	output [47:0] RTC_savedtimeOut,
-	output        RTC_inuse
+	output        RTC_inuse,
+
+	input         ss_gb_paused,
+
+	output  [7:0] cart_ram_size,
+
+	input  [63:0] SaveStateBus_Din,
+	input   [9:0] SaveStateBus_Adr,
+	input         SaveStateBus_wren,
+	input         SaveStateBus_load,
+	output [63:0] SaveStateBus_Dout,
+
+	input  [19:0] Savestate_RAMAddr,
+	input   [7:0] Savestate_RAMWriteData,
+	input   [4:0] Savestate_RAMRWrEn,
+	output  [7:0] Savestate_RAMReadData_WRAM,
+	output  [7:0] Savestate_RAMReadData_VRAM,
+	output  [7:0] Savestate_RAMReadData_ORAM,
+	output  [7:0] Savestate_RAMReadData_ZRAM,
+	output  [7:0] Savestate_RAMReadData_CRAM
 );
 
 wire [14:0] cart_addr;
@@ -67,14 +88,15 @@ wire cart_oe;
 wire [7:0] cart_di, cart_do;
 wire nCS; // WRAM or Cart RAM CS
 wire cram_rd;
-
-wire [7:0] cart_ram_size;
+wire cpu_rd, cpu_wr;
 
 wire SaveStateBus_rst;
+wire [63:0] SaveStateExt_Dout, SaveStateGB_Dout;
+assign SaveStateBus_Dout = SaveStateGB_Dout | SaveStateExt_Dout;
 
 assign rom_addr = mbc_addr;
 assign rom_rd = (cart_rd & ~cart_a15);
-
+assign cpu_act = (cpu_rd | cpu_wr);
 
 cart_top cart (
 	.reset	     ( reset      ),
@@ -136,18 +158,18 @@ cart_top cart (
 	.RTC_savedtimeOut ( RTC_savedtimeOut ),
 	.RTC_inuse        ( RTC_inuse        ),
 
-	.SaveStateExt_Din ( 0  ),
-	.SaveStateExt_Adr ( 0  ),
-	.SaveStateExt_wren( 0 ),
+	.SaveStateExt_Din ( SaveStateBus_Din  ),
+	.SaveStateExt_Adr ( SaveStateBus_Adr ),
+	.SaveStateExt_wren( SaveStateBus_wren ),
 	.SaveStateExt_rst ( SaveStateBus_rst  ),
-	.SaveStateExt_Dout(  ),
-	.savestate_load   ( 0   ),
-	.sleep_savestate  ( 0   ),
+	.SaveStateExt_Dout( SaveStateExt_Dout ),
+	.savestate_load   ( SaveStateBus_load   ),
+	.sleep_savestate  ( ss_gb_paused ),
 
-	.Savestate_CRAMAddr     ( 0  ),
-	.Savestate_CRAMRWrEn    ( 0  ),
-	.Savestate_CRAMWriteData( 0  ),
-	.Savestate_CRAMReadData (    )
+	.Savestate_CRAMAddr     ( Savestate_RAMAddr  ),
+	.Savestate_CRAMRWrEn    ( Savestate_RAMRWrEn[4] ),
+	.Savestate_CRAMWriteData( Savestate_RAMWriteData ),
+	.Savestate_CRAMReadData ( Savestate_RAMReadData_CRAM )
 );
 
 // the gameboy itself
@@ -173,6 +195,9 @@ gb gb (
 	.cart_do     ( cart_do    ),
 	.cart_di     ( cart_di    ),
 	.cart_oe     ( cart_oe    ),
+
+	.cpu_rd      ( cpu_rd     ),
+	.cpu_wr      ( cpu_wr     ),
 
 	.nCS         ( nCS     ),
 
@@ -209,35 +234,23 @@ gb gb (
 	.gg_available (gg_available),
 
 	// savestates
-	.increaseSSHeaderCount (1'b0),
-	.cart_ram_size   (cart_ram_size),
-	.save_state      (1'b0),
-	.load_state      (1'b0),
-	.savestate_number(2'b00),
-	.sleep_savestate (),
+	.SaveStateBus_Din   (SaveStateBus_Din),
+	.SaveStateBus_Adr   (SaveStateBus_Adr),
+	.SaveStateBus_wren  (SaveStateBus_wren),
+	.SaveStateBus_rst   (SaveStateBus_rst),
+	.SaveStateBus_load  (SaveStateBus_load),
+	.SaveStateBus_Dout  (SaveStateGB_Dout),
 
-	.SaveStateExt_Din (),
-	.SaveStateExt_Adr (),
-	.SaveStateExt_wren(),
-	.SaveStateExt_rst (SaveStateBus_rst),
-	.SaveStateExt_Dout(0),
-	.SaveStateExt_load(),
+	.Savestate_RAMAddr          (Savestate_RAMAddr),
+	.Savestate_RAMWriteData     (Savestate_RAMWriteData),
+	.Savestate_RAMRWrEn         (Savestate_RAMRWrEn[3:0]),
+	.Savestate_RAMReadData_WRAM (Savestate_RAMReadData_WRAM),
+	.Savestate_RAMReadData_VRAM (Savestate_RAMReadData_VRAM),
+	.Savestate_RAMReadData_ORAM (Savestate_RAMReadData_ORAM),
+	.Savestate_RAMReadData_ZRAM (Savestate_RAMReadData_ZRAM)
 
-	.Savestate_CRAMAddr     (),
-	.Savestate_CRAMRWrEn    (),
-	.Savestate_CRAMWriteData(),
-	.Savestate_CRAMReadData (0),
 
-	.SAVE_out_Din(),            // data read from savestate
-	.SAVE_out_Dout(0),          // data written to savestate
-	.SAVE_out_Adr(),           // all addresses are DWORD addresses!
-	.SAVE_out_rnw(),            // read = 1, write = 0
-	.SAVE_out_ena(),            // one cycle high for each action
-	.SAVE_out_be(),            
-	.SAVE_out_done(1'b1),            // should be one cycle high when write is done or read value is valid
 
-	.rewind_on(1'b0),
-	.rewind_active(1'b0)
 );
 
 

@@ -8,7 +8,6 @@ set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) bus_savest
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) reg_savestates.vhd ]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) gb_statemanager.vhd ]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) gb_savestates.vhd ]
-set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) savestate_ui.sv ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) gb.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) hdma.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) link.v ]

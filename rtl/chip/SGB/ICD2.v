@@ -20,7 +20,10 @@ module ICD2(
 	input             pal,
 	input       [1:0] sgb_speed,
 	output reg        gb_rst_n,
-	output            gb_clk_en
+	output            gb_clk_en,
+
+	input             ss_gb_paused
+
 );
 
 reg  [7:0] packet_data[0:15];
@@ -64,6 +67,11 @@ wire r780x = icd2_sel & (ca[12:11] == 2'b11);
 wire p14 = joy_p54[0];
 wire p15 = joy_p54[1];
 
+wire ss_io = ss_gb_paused & ~ca[22] & (ca[15:12] == 4'b0101); // 00-3F,80-BF:5xNN
+wire ss_io_wr = ss_io & ~ca[11] & ~cpuwr_n;
+wire ss_ram_wr = ss_io & ca[11] & ~cpuwr_n;
+reg [7:0] ss_do;
+
 always @(*) begin
 	icd_do = 8'h00;
 	if (r6000) icd_do = { pix_y[7:3], 1'b0, trn_write_buffer };      // $6000 LCD Row, Write buffer
@@ -71,9 +79,10 @@ always @(*) begin
 	if (r600F) icd_do = 8'h21;                                       // $600F Chip version
 	if (r700x) icd_do = packet_data[ ca[3:0] ];                      // $7000-7000F 16-Byte packet
 	if (r780x) icd_do = (trn_read_index < 320) ? trn_data_q : 8'hFF; // $7800 Tile data Mirror: $7801-780F
+	if (ss_io) icd_do = ss_do;                                       // $5000 Save state
 end
 
-assign icd2_oe = r6000 | r6002 | r600F | r700x | r780x;
+assign icd2_oe = r6000 | r6002 | r600F | r700x | r780x | ss_io;
 
 
 always @(posedge clk or negedge rst_n) begin
@@ -138,7 +147,7 @@ CEGen gb_ce
 	.CE(gb2_ce)
 );
 
-assign gb_clk_en = (sgb_speed == 2'd0) ? gb1_ce : gb2_ce;
+assign gb_clk_en = ~ss_gb_paused & ((sgb_speed == 2'd0) ? gb1_ce : gb2_ce);
 
 // SGB command packets
 always @(posedge clk or negedge rst_n) begin
@@ -147,7 +156,29 @@ always @(posedge clk or negedge rst_n) begin
 		byte_cnt <= 0;
 		byte_done <= 0;
 		packet_end <= 1'b1;
+		new_packet <= 0;
 	end else begin
+		if (ss_io_wr) begin
+			case(ca[7:0])
+				8'h00: begin
+					old_p14    <= di[0];
+					old_p15	   <= di[1];
+					byte_done  <= di[2];
+					new_packet <= di[3];
+				end
+				8'h01: begin
+					packet_end <= di[0];
+					byte_cnt   <= di[4:1];
+					cnt        <= di[7:5];
+				end
+				8'h02: data <= di;
+				default: ;
+			endcase
+
+			if (ca[7:4] == 4'h1) begin //$10-$1F
+				packet_data[ ca[3:0] ] <= di;
+			end
+		end
 
 		if (gb_clk_en) begin
 			old_p15 <= p15;
@@ -186,7 +217,9 @@ always @(posedge clk or negedge rst_n) begin
 		end
 
 		if (~cpurd_n_old & cpurd_n & r7000) begin
-			new_packet <= 0;
+			if (~ss_gb_paused) begin
+				new_packet <= 0;
+			end
 		end
 	end
 
@@ -218,6 +251,26 @@ always @(posedge clk or negedge rst_n) begin
 			endcase
 		end
 
+		if (ss_io_wr) begin
+			case(ca[7:0])
+				8'h03: begin
+					gb_rst_n        <= di[7];
+					num_controllers <= di[5:4];
+					gb_cpu_speed    <= di[1:0];
+				end
+				8'h04: buttons1 <= di;
+				8'h05: buttons2 <= di;
+				8'h06: buttons3 <= di;
+				8'h07: buttons4 <= di;
+				8'h0A: trn_read_index[7:0] <= di;
+				8'h0B: begin
+					trn_read_index[8] <= di[0];
+					trn_read_buffer <= di[2:1];
+				end
+				default: ;
+			endcase
+		end
+
 		if (~cpurd_n_old & cpurd_n & r780x) begin
 			trn_read_index <= trn_read_index + 1'b1;
 		end
@@ -240,6 +293,8 @@ end
 always @(posedge clk or negedge rst_n) begin
 	 if (~rst_n) begin
 		joypad_id <= 0;
+	end else if (ss_io_wr & (ca[7:0] == 8'h03)) begin
+		joypad_id <= di[3:2];
 	end else if (gb_clk_en) begin
 		joypad_id <= (joypad_id & num_controllers);
 		if (~old_p15 & p15) begin
@@ -271,10 +326,24 @@ always @(posedge clk or negedge rst_n) begin
 		pix_x <= 0;
 		pix_y <= 0;
 	end else begin
-		old_lcd_vs <= lcd_vs;
-		if(~old_lcd_vs & lcd_vs) begin
-			pix_x <= 0;
-			pix_y <= 0;
+		if (~ss_gb_paused) begin
+			old_lcd_vs <= lcd_vs;
+			if(~old_lcd_vs & lcd_vs) begin
+				pix_x <= 0;
+				pix_y <= 0;
+			end
+		end
+
+		if (ss_io_wr) begin
+			case(ca[7:0])
+				8'h00: old_lcd_vs <= di[4];
+				8'h08: pix_x <= di;
+				8'h09: pix_y <= di;
+				8'h0B: trn_write_buffer <= di[4:3];
+				8'h0C: trn_temp_l <= di;
+				8'h0D: trn_temp_h <= di;
+				default: ;
+			endcase
 		end
 
 		trn_write <= 0;
@@ -302,13 +371,15 @@ always @(posedge clk or negedge rst_n) begin
 	end
 end
 
+wire [10:0] trn_read_addr = ss_gb_paused ? ca[10:0] : { trn_read_buffer, trn_read_index[8:0] };
+
 // 4x 320 byte tile data buffers
 dpram_dif #(11,8,10,16) trn_data (
 	.clock (clk),
 
-	.address_a ( {trn_read_buffer, trn_read_index[8:0]} ),
-	.wren_a (0),
-	.data_a ( ),
+	.address_a ( trn_read_addr ),
+	.wren_a (ss_ram_wr),
+	.data_a (di),
 	.q_a (trn_data_q),
 
 	.address_b ( {trn_write_buf_l, trn_write_index[7:0]} ),
@@ -316,5 +387,31 @@ dpram_dif #(11,8,10,16) trn_data (
 	.data_b ( {trn_temp_h, trn_temp_l} ),
 	.q_b ()
 );
+
+always @(posedge clk) begin
+	ss_do <= 8'h00;
+	if (ca[11]) begin
+		ss_do <= trn_data_q;
+	end else begin
+		case (ca[7:0])
+			8'h00: ss_do <= { 3'd0, old_lcd_vs, new_packet, byte_done, old_p15, old_p14 };
+			8'h01: ss_do <= { cnt, byte_cnt, packet_end };
+			8'h02: ss_do <= data;
+			8'h03: ss_do <= { gb_rst_n, 1'd0, num_controllers, joypad_id, gb_cpu_speed };
+			8'h04: ss_do <= buttons1;
+			8'h05: ss_do <= buttons2;
+			8'h06: ss_do <= buttons3;
+			8'h07: ss_do <= buttons4;
+			8'h08: ss_do <= pix_x;
+			8'h09: ss_do <= pix_y;
+			8'h0A: ss_do <= trn_read_index[7:0];
+			8'h0B: ss_do <= {3'd0, trn_write_buffer, trn_read_buffer, trn_read_index[8] };
+			8'h0C: ss_do <= trn_temp_l;
+			8'h0D: ss_do <= trn_temp_h;
+			//8'h10-1F: packet_data
+			default: ;
+		endcase
+	end
+end
 
 endmodule

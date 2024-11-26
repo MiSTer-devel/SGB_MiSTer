@@ -64,7 +64,26 @@ module SGBMap(
 	input       [1:0] sgb_speed,
 	input       [2:0] gb_mapper,
 
-	input             rom_mask
+	input             rom_mask,
+
+	input             ss_busy,
+
+	output      [7:0] cart_ram_size,
+
+	input      [63:0] SaveStateBus_Din,
+	input       [9:0] SaveStateBus_Adr,
+	input             SaveStateBus_wren,
+	input             SaveStateBus_load,
+	output     [63:0] SaveStateBus_Dout,
+
+	input      [19:0] Savestate_RAMAddr,
+	input       [7:0] Savestate_RAMWriteData,
+	input       [4:0] Savestate_RAMRWrEn,
+	output      [7:0] Savestate_RAMReadData_WRAM,
+	output      [7:0] Savestate_RAMReadData_VRAM,
+	output      [7:0] Savestate_RAMReadData_ORAM,
+	output      [7:0] Savestate_RAMReadData_ZRAM,
+	output      [7:0] Savestate_RAMReadData_CRAM
 );
 
 reg rom_rd;
@@ -105,6 +124,9 @@ wire        gb_rst_n;
 wire        gb_clk_en;
 wire  [7:0] icd_do;
 
+wire        gb_cpu_act;
+wire        ss_gb_paused = ss_busy & ~gb_cpu_act;
+
 ICD2 ICD2
 (
 	.clk(clk),
@@ -129,7 +151,9 @@ ICD2 ICD2
 	.sgb_speed(sgb_speed),
 
 	.gb_rst_n(gb_rst_n),
-	.gb_clk_en(gb_clk_en)
+	.gb_clk_en(gb_clk_en),
+
+	.ss_gb_paused(ss_gb_paused)
 );
 
 localparam MCLK_NTSC = 21477270;
@@ -144,6 +168,8 @@ CEGen rtc_ce
 	.OUT_CLK(32768),
 	.CE(ce_32k)
 );
+
+
 
 GBTop GBTop
 (
@@ -163,6 +189,8 @@ GBTop GBTop
 	.rom_di         (gb_rom_di),
 
 	.cram_wr        (gb_cram_wr),
+
+	.cpu_act        (gb_cpu_act),
 
 	.bk_wr          (gb_bk_wr),
 	.bk_rtc_wr      (gb_rtc_wr),
@@ -201,7 +229,26 @@ GBTop GBTop
 	.RTC_time         (gb_rtc_time_in),
 	.RTC_timestampOut (gb_rtc_timeout),
 	.RTC_savedtimeOut (gb_rtc_savedtime),
-	.RTC_inuse        (gb_rtc_inuse)
+	.RTC_inuse        (gb_rtc_inuse),
+
+	// savestates
+	.ss_gb_paused    (ss_gb_paused),
+	.cart_ram_size   (cart_ram_size),
+
+	.SaveStateBus_Din   (SaveStateBus_Din),
+	.SaveStateBus_Adr   (SaveStateBus_Adr),
+	.SaveStateBus_wren  (SaveStateBus_wren),
+	.SaveStateBus_load  (SaveStateBus_load),
+	.SaveStateBus_Dout  (SaveStateBus_Dout),
+
+	.Savestate_RAMAddr          (Savestate_RAMAddr),
+	.Savestate_RAMWriteData     (Savestate_RAMWriteData),
+	.Savestate_RAMRWrEn         (Savestate_RAMRWrEn),
+	.Savestate_RAMReadData_WRAM (Savestate_RAMReadData_WRAM),
+	.Savestate_RAMReadData_VRAM (Savestate_RAMReadData_VRAM),
+	.Savestate_RAMReadData_ORAM (Savestate_RAMReadData_ORAM),
+	.Savestate_RAMReadData_ZRAM (Savestate_RAMReadData_ZRAM),
+	.Savestate_RAMReadData_CRAM (Savestate_RAMReadData_CRAM)
 
 );
 

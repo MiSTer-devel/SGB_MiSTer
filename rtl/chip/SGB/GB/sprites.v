@@ -77,15 +77,19 @@ wire [7:0] oam_addr = dma_active ? oam_addr_in :
 wire valid_oam_addr = (oam_addr[7:4] < 4'hA); // $FEA0 - $FEFF unused range
 assign oam_do = dma_active ? 8'hFF : valid_oam_addr ? oam_q : 8'd0;
 
-spram #(8) oam_data (
-	.clock   (clk      ),
-	.address (oam_addr ),
-	.wren    (ce_cpu && oam_wr && valid_oam_addr),
-	.data    (oam_di   ),
-	.q       (oam_q    )
-);
+dpram_difclk #(8,8, 8,8) oam_data (
+	.clock0    (clk      ),
+	.address_a (oam_addr ),
+	.wren_a    (ce_cpu && oam_wr && valid_oam_addr),
+	.data_a    (oam_di   ),
+	.q_a       (oam_q    ),
 
-assign Savestate_OAMRAMReadData = 0;
+	.clock1    (clk),
+	.address_b (Savestate_OAMRAMAddr     ),
+	.wren_b    (Savestate_OAMRAMRWrEn    ),
+	.data_b    (Savestate_OAMRAMWriteData),
+	.q_b       (Savestate_OAMRAMReadData )
+);
 
 reg [7:0] sprite_x[0:SPRITES_PER_LINE-1];
 reg [3:0] sprite_y[0:SPRITES_PER_LINE-1];
